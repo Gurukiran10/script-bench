@@ -1,0 +1,359 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Script Bench</title>
+<style>
+  :root {
+    --bg: #f6f5f1; --panel: #ffffff; --ink: #17171a; --muted: #6a6a73; --faint: #9b9ba3;
+    --line: #e6e4dd; --soft: #f1efe9;
+    --accent: #3b5bdb; --accent-ink: #ffffff; --accent-soft: #e8edff;
+    --hook: #d9480f; --body: #3b5bdb; --cta: #2b8a3e;
+    --good: #2b8a3e; --warn: #b35c00; --bad: #c92a2a;
+    --shadow: 0 1px 2px rgba(20,20,30,.05), 0 8px 24px rgba(20,20,30,.06);
+  }
+  @media (prefers-color-scheme: dark) {
+    :root {
+      --bg: #111114; --panel: #1a1a1f; --ink: #ededf0; --muted: #a0a0aa; --faint: #6e6e78;
+      --line: #2b2b33; --soft: #222229;
+      --accent: #7b93ff; --accent-ink: #0d0d12; --accent-soft: #232a4a;
+      --hook: #ff8a4c; --body: #7b93ff; --cta: #5ccf7a;
+      --good: #5ccf7a; --warn: #f0a33a; --bad: #ff6b6b;
+      --shadow: 0 1px 2px rgba(0,0,0,.3), 0 8px 24px rgba(0,0,0,.3);
+    }
+  }
+  * { box-sizing: border-box; }
+  body { margin: 0; background: var(--bg); color: var(--ink);
+         font: 15px/1.55 ui-sans-serif, system-ui, -apple-system, "Segoe UI", Roboto, sans-serif; }
+  .wrap { max-width: 1120px; margin: 0 auto; padding: 32px 20px 64px; }
+
+  /* Header */
+  header { display: flex; align-items: flex-end; justify-content: space-between; gap: 16px; flex-wrap: wrap; }
+  .brand { display: flex; align-items: center; gap: 12px; }
+  .logo { width: 40px; height: 40px; border-radius: 10px; background: var(--accent); color: var(--accent-ink);
+          display: grid; place-items: center; font-weight: 800; font-size: 18px; }
+  h1 { margin: 0; font-size: 24px; letter-spacing: -.01em; }
+  .tagline { margin: 2px 0 0; color: var(--muted); }
+
+  /* How it works */
+  .steps { list-style: none; margin: 24px 0 28px; padding: 0; display: grid;
+           grid-template-columns: repeat(5, 1fr); gap: 8px; counter-reset: s; }
+  .steps li { background: var(--panel); border: 1px solid var(--line); border-radius: 10px; padding: 10px 12px;
+              font-size: 13px; color: var(--muted); counter-increment: s; }
+  .steps b { display: block; color: var(--ink); font-size: 13px; }
+  .steps b::before { content: counter(s) ". "; color: var(--faint); font-weight: 600; }
+  .who { font-size: 11px; font-weight: 700; letter-spacing: .05em; text-transform: uppercase; }
+  .who.ai { color: var(--accent); } .who.code { color: var(--faint); }
+
+  /* Layout */
+  .grid { display: grid; grid-template-columns: 360px 1fr; gap: 20px; align-items: start; }
+  .panel { background: var(--panel); border: 1px solid var(--line); border-radius: 14px; box-shadow: var(--shadow); }
+
+  /* Form */
+  form { padding: 20px; position: sticky; top: 20px; }
+  label, .label { display: block; font-size: 13px; font-weight: 600; margin: 0 0 6px; }
+  input[type=text], textarea {
+    width: 100%; font: inherit; color: inherit; background: var(--soft); border: 1px solid var(--line);
+    border-radius: 9px; padding: 10px 12px; margin: 0 0 16px; }
+  textarea { resize: vertical; min-height: 76px; }
+  input:focus, textarea:focus { outline: 2px solid var(--accent); outline-offset: 1px; }
+  .seg { display: flex; background: var(--soft); border: 1px solid var(--line); border-radius: 9px; padding: 3px; margin-bottom: 16px; }
+  .seg input { position: absolute; opacity: 0; pointer-events: none; }
+  .seg label { flex: 1; text-align: center; margin: 0; padding: 7px 0; border-radius: 7px; cursor: pointer;
+               font-weight: 600; color: var(--muted); }
+  .seg input:checked + label { background: var(--panel); color: var(--ink); box-shadow: 0 1px 3px rgba(0,0,0,.12); }
+  .seg input:focus-visible + label { outline: 2px solid var(--accent); }
+  .hint { font-size: 12px; color: var(--faint); margin: -10px 0 16px; }
+  button.primary { width: 100%; background: var(--accent); color: var(--accent-ink); border: 0; border-radius: 10px;
+                   padding: 12px; font: inherit; font-weight: 700; cursor: pointer; }
+  button.primary:disabled { opacity: .65; cursor: progress; }
+  .examples { margin-top: 18px; border-top: 1px solid var(--line); padding-top: 14px; }
+  .chips { display: flex; flex-wrap: wrap; gap: 6px; }
+  .chip { font: inherit; font-size: 12px; background: var(--soft); color: var(--ink); border: 1px solid var(--line);
+          border-radius: 999px; padding: 5px 10px; cursor: pointer; }
+  .chip:hover { border-color: var(--accent); }
+
+  /* Result */
+  #result { min-height: 420px; }
+  .empty { padding: 56px 32px; text-align: center; color: var(--muted); }
+  .empty h2 { color: var(--ink); font-size: 18px; margin: 0 0 6px; }
+  .loading { padding: 40px 32px; }
+  .loading ol { margin: 12px 0 0; padding-left: 20px; color: var(--faint); }
+  .loading li.on { color: var(--ink); font-weight: 600; }
+  .loading li.done { color: var(--good); }
+  .error { padding: 24px; }
+  .error h2 { margin: 0 0 6px; font-size: 17px; color: var(--bad); }
+
+  .result-head { display: flex; flex-wrap: wrap; gap: 8px; align-items: center; justify-content: space-between;
+                 padding: 16px 20px; border-bottom: 1px solid var(--line); }
+  .badges { display: flex; flex-wrap: wrap; gap: 6px; }
+  .badge { font-size: 12px; font-weight: 600; padding: 4px 10px; border-radius: 999px; background: var(--soft);
+           border: 1px solid var(--line); color: var(--muted); }
+  .badge.good { color: var(--good); } .badge.warn { color: var(--warn); } .badge.bad { color: var(--bad); }
+  button.ghost { font: inherit; font-size: 13px; font-weight: 600; background: none; color: var(--accent);
+                 border: 1px solid var(--line); border-radius: 8px; padding: 6px 12px; cursor: pointer; }
+
+  .timing { padding: 16px 20px 4px; }
+  .bar { position: relative; display: flex; height: 12px; border-radius: 6px; overflow: hidden; background: var(--soft); }
+  .bar span { display: block; height: 100%; }
+  .bar .h { background: var(--hook); } .bar .b { background: var(--body); } .bar .c { background: var(--cta); }
+  .bar-wrap { position: relative; }
+  .target { position: absolute; top: -4px; bottom: -4px; width: 2px; background: var(--ink); border-radius: 1px; }
+  .legend { display: flex; flex-wrap: wrap; gap: 14px; margin-top: 8px; font-size: 12px; color: var(--muted); }
+  .dot { display: inline-block; width: 8px; height: 8px; border-radius: 50%; margin-right: 5px; vertical-align: 1px; }
+
+  .script { padding: 12px 20px 8px; }
+  .part { display: grid; grid-template-columns: 64px 1fr; gap: 14px; padding: 14px 0; border-bottom: 1px dashed var(--line); }
+  .part:last-child { border-bottom: 0; }
+  .tag { font-size: 11px; font-weight: 800; letter-spacing: .07em; padding-top: 4px; }
+  .tag small { display: block; font-weight: 600; letter-spacing: 0; color: var(--faint); font-size: 12px; }
+  .tag.h { color: var(--hook); } .tag.b { color: var(--body); } .tag.c { color: var(--cta); }
+  .hook { font-size: 21px; line-height: 1.35; font-weight: 700; letter-spacing: -.01em; }
+  .body p { margin: 0 0 10px; } .body p:last-child { margin: 0; }
+  .cta { font-weight: 600; }
+
+  .extras { padding: 4px 20px 20px; display: grid; gap: 12px; }
+  .box { border: 1px solid var(--line); border-radius: 10px; padding: 12px 14px; background: var(--soft); }
+  .box h3 { margin: 0 0 6px; font-size: 13px; }
+  .box ul { margin: 0; padding-left: 18px; }
+  .box li { margin: 3px 0; }
+  .box.verify { border-color: color-mix(in srgb, var(--warn) 45%, var(--line)); }
+  .box.verify h3 { color: var(--warn); }
+  .sev { font-size: 11px; font-weight: 700; text-transform: uppercase; margin-right: 6px; }
+  .sev.hard { color: var(--bad); } .sev.soft { color: var(--warn); }
+  table { width: 100%; border-collapse: collapse; font-size: 13px; }
+  th, td { text-align: left; padding: 7px 8px; border-bottom: 1px solid var(--line); vertical-align: top; }
+  th { font-size: 11px; text-transform: uppercase; letter-spacing: .05em; color: var(--faint); }
+  tr.win td { font-weight: 600; }
+  .win-mark { color: var(--good); font-weight: 800; }
+  .reasons { color: var(--faint); font-size: 12px; }
+  details summary { cursor: pointer; font-weight: 600; font-size: 13px; }
+  details[open] summary { margin-bottom: 8px; }
+
+  footer { margin-top: 28px; color: var(--faint); font-size: 12px; text-align: center; }
+
+  @media (max-width: 880px) {
+    .grid { grid-template-columns: 1fr; }
+    form { position: static; }
+    .steps { grid-template-columns: repeat(2, 1fr); }
+  }
+  @media (max-width: 480px) {
+    .wrap { padding: 20px 16px 48px; }
+    .steps { grid-template-columns: 1fr; }
+    .part { grid-template-columns: 1fr; gap: 4px; }
+  }
+</style>
+</head>
+<body>
+<div class="wrap">
+  <header>
+    <div class="brand">
+      <div class="logo" aria-hidden="true">S</div>
+      <div>
+        <h1>Script Bench</h1>
+        <p class="tagline">Turn an idea into a short-form video script, timed to the length you want to film.</p>
+      </div>
+    </div>
+  </header>
+
+  <ol class="steps" aria-label="How it works">
+    <li><span class="who code">Code</span><b>Plan</b>Seconds become a word budget (~2.5 words/sec)</li>
+    <li><span class="who ai">AI</span><b>Draft</b>One core idea, 3 hooks in different styles, body, CTA</li>
+    <li><span class="who code">Code</span><b>Pick hook</b>Scores the 3 hooks and keeps the strongest</li>
+    <li><span class="who code">Code</span><b>Check</b>Length, cliches, one clear ask, read-aloud problems</li>
+    <li><span class="who ai">AI</span><b>Revise</b>Fixes only what the check flagged, then the best version wins</li>
+  </ol>
+
+  <div class="grid">
+    <form id="form" class="panel" autocomplete="off">
+      <label for="niche">Niche</label>
+      <input id="niche" type="text" required maxlength="80" placeholder="e.g. personal finance" value="fitness">
+
+      <label for="topic">Topic</label>
+      <textarea id="topic" required maxlength="300" placeholder="One sentence on what this video is about">Why stretching before lifting is overrated</textarea>
+
+      <span class="label" id="len-label">Video length</span>
+      <div class="seg" role="radiogroup" aria-labelledby="len-label">
+        <input type="radio" name="seconds" id="s30" value="30"><label for="s30">30s</label>
+        <input type="radio" name="seconds" id="s45" value="45" checked><label for="s45">45s</label>
+        <input type="radio" name="seconds" id="s60" value="60"><label for="s60">60s</label>
+      </div>
+
+      <span class="label" id="mode-label">Writer</span>
+      <div class="seg" role="radiogroup" aria-labelledby="mode-label">
+        <input type="radio" name="mode" id="m-ai" value="ai" checked><label for="m-ai">AI + checks</label>
+        <input type="radio" name="mode" id="m-off" value="offline"><label for="m-off">Templates only</label>
+      </div>
+      <p class="hint" id="mode-hint">Gemini writes, code checks and corrects. Takes 10&ndash;60 seconds.</p>
+
+      <button class="primary" id="go" type="submit">Generate script</button>
+
+      <div class="examples">
+        <span class="label">Try an example</span>
+        <div class="chips" id="chips"></div>
+      </div>
+    </form>
+
+    <section id="result" class="panel" aria-live="polite">
+      <div class="empty">
+        <h2>Your script will appear here</h2>
+        <p>Pick a niche, write one sentence about the video, choose a length and hit <b>Generate</b>.<br>
+           You'll get the hook, body and call-to-action, plus how long each part takes to say.</p>
+      </div>
+    </section>
+  </div>
+
+  <footer>Runs on your own computer. Your API key never leaves this machine.</footer>
+</div>
+
+<script>
+const EXAMPLES = [
+  ["personal finance", "I automated my savings and forgot about it for two years", 45],
+  ["study skills", "Rereading your notes is the worst way to study for an exam", 30],
+  ["home cooking", "A 10-minute weeknight pasta using only pantry staples", 60],
+  ["budget travel", "How to spend three days in Tokyo for under $300, not counting flights", 60],
+  ["tech careers", "The one habit that got me promoted from junior to mid-level developer in 14 months", 45],
+];
+const STEPS = ["Planning the word budget", "Drafting the idea, 3 hooks and the body",
+               "Scoring the hooks", "Checking length and clarity", "Fixing anything flagged"];
+
+const $ = id => document.getElementById(id);
+const esc = s => String(s).replace(/[&<>"']/g, c =>
+  ({"&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;"}[c]));
+const mode = () => document.querySelector("input[name=mode]:checked").value;
+const seconds = () => +document.querySelector("input[name=seconds]:checked").value;
+
+for (const [niche, topic, secs] of EXAMPLES) {
+  const b = document.createElement("button");
+  b.type = "button"; b.className = "chip"; b.textContent = niche;
+  b.title = topic;
+  b.onclick = () => { $("niche").value = niche; $("topic").value = topic; $("s" + secs).checked = true; };
+  $("chips").append(b);
+}
+
+document.querySelectorAll("input[name=mode]").forEach(r => r.addEventListener("change", () => {
+  $("mode-hint").textContent = mode() === "ai"
+    ? "Gemini writes, code checks and corrects. Takes 10–60 seconds."
+    : "No AI: fixed templates. Instant, but generic. Useful as a comparison.";
+}));
+
+let timer;
+function showLoading(ai) {
+  const items = (ai ? STEPS : ["Filling templates", "Checking length and clarity"])
+    .map(s => `<li>${s}</li>`).join("");
+  $("result").innerHTML = `<div class="loading"><b>${ai ? "Writing your script…" : "Building…"}</b><ol>${items}</ol></div>`;
+  const lis = [...$("result").querySelectorAll("li")];
+  let i = 0;
+  const tick = () => {
+    lis.forEach((li, j) => li.className = j < i ? "done" : j === i ? "on" : "");
+    if (i < lis.length - 1) i++;
+  };
+  tick();
+  timer = setInterval(tick, ai ? 4000 : 150);
+}
+
+$("form").addEventListener("submit", async e => {
+  e.preventDefault();
+  const ai = mode() === "ai";
+  $("go").disabled = true;
+  showLoading(ai);
+  try {
+    const res = await fetch("/api/generate", {
+      method: "POST", headers: {"Content-Type": "application/json"},
+      body: JSON.stringify({niche: $("niche").value, topic: $("topic").value,
+                            seconds: seconds(), offline: !ai}),
+    });
+    const data = await res.json();
+    res.ok ? render(data) : showError(data);
+  } catch (err) {
+    showError({error: "Couldn't reach the local server. Is python -m scriptbench.web still running?"});
+  } finally {
+    clearInterval(timer);
+    $("go").disabled = false;
+  }
+});
+
+function showError(d) {
+  const tip = d.transient
+    ? `<p>This is on Google's side, not yours. Wait a minute and try again, or switch <b>Writer</b> to <b>Templates only</b> to see the pipeline work offline.</p>
+       <button class="ghost" type="button" onclick="$('m-off').click(); $('go').click()">Run with templates</button>`
+    : "";
+  $("result").innerHTML = `<div class="error"><h2>Couldn't generate a script</h2><p>${esc(d.error)}</p>${tip}</div>`;
+}
+
+function render(d) {
+  const m = d.meta, s = m.section_seconds, target = m.target_seconds, est = m.estimated_seconds;
+  const off = Math.abs(est - target) / target;
+  const scale = Math.max(target, est) * 1.08;
+  const pct = x => (x / scale * 100).toFixed(2) + "%";
+  const timingClass = off <= 0.12 ? "good" : "bad";
+  const scoreClass = m.score >= 90 ? "good" : m.score >= 70 ? "warn" : "bad";
+  const engine = m.engine === "templates" ? "Templates only" : m.engine;
+
+  const issues = m.issues.map(i =>
+    `<li><span class="sev ${i.severity}">${i.severity === "hard" ? "Must fix" : "Could improve"}</span>${esc(i.message)}</li>`).join("");
+  const verify = (m.verify || []).map(v => `<li>${esc(v)}</li>`).join("");
+  const hooks = (m.hook_candidates || []).map(h => {
+    const win = h.text === d.hook;
+    return `<tr class="${win ? "win" : ""}"><td>${win ? '<span class="win-mark">✓</span>' : ""}</td>
+      <td>${esc(h.style.replace(/_/g, " "))}</td><td>${h.score}</td>
+      <td>${esc(h.text)}<div class="reasons">${esc(h.reasons.join("  "))}</div></td></tr>`;
+  }).join("");
+
+  $("result").innerHTML = `
+    <div class="result-head">
+      <div class="badges">
+        <span class="badge ${timingClass}">~${Math.round(est)}s of ${target}s</span>
+        <span class="badge ${scoreClass}">Check score ${m.score}/100</span>
+        <span class="badge">${esc(engine)}</span>
+        ${m.revisions !== undefined ? `<span class="badge">${m.revisions} revision${m.revisions === 1 ? "" : "s"}</span>` : ""}
+        ${m.hook_style ? `<span class="badge">Hook: ${esc(m.hook_style.replace(/_/g, " "))}</span>` : ""}
+      </div>
+      <button class="ghost" type="button" id="copy">Copy script</button>
+    </div>
+
+    <div class="timing">
+      <div class="bar-wrap">
+        <div class="bar" role="img" aria-label="Hook ${s.hook}s, body ${s.body}s, CTA ${s.cta}s, target ${target}s">
+          <span class="h" style="width:${pct(s.hook)}"></span>
+          <span class="b" style="width:${pct(s.body)}"></span>
+          <span class="c" style="width:${pct(s.cta)}"></span>
+        </div>
+        <div class="target" style="left:${pct(target)}" title="Target: ${target}s"></div>
+      </div>
+      <div class="legend">
+        <span><i class="dot" style="background:var(--hook)"></i>Hook ${s.hook}s</span>
+        <span><i class="dot" style="background:var(--body)"></i>Body ${s.body}s</span>
+        <span><i class="dot" style="background:var(--cta)"></i>CTA ${s.cta}s</span>
+        <span>▎ target ${target}s</span>
+      </div>
+    </div>
+
+    <div class="script">
+      <div class="part"><div class="tag h">HOOK<small>~${Math.round(s.hook)}s</small></div>
+        <div class="hook">${esc(d.hook)}</div></div>
+      <div class="part"><div class="tag b">BODY<small>~${Math.round(s.body)}s</small></div>
+        <div class="body">${d.body.split("\n\n").map(p => `<p>${esc(p)}</p>`).join("")}</div></div>
+      <div class="part"><div class="tag c">CTA<small>~${Math.round(s.cta)}s</small></div>
+        <div class="cta">${esc(d.cta)}</div></div>
+    </div>
+
+    <div class="extras">
+      ${verify ? `<div class="box verify"><h3>Check before filming</h3><ul>${verify}</ul></div>` : ""}
+      ${issues ? `<div class="box"><h3>What the checker flagged</h3><ul>${issues}</ul></div>`
+               : `<div class="box"><h3>What the checker flagged</h3>Nothing. It passed every check.</div>`}
+      ${hooks ? `<details class="box"><summary>The 3 hooks it considered</summary>
+        <table><thead><tr><th></th><th>Style</th><th>Score</th><th>Hook</th></tr></thead><tbody>${hooks}</tbody></table></details>` : ""}
+    </div>`;
+
+  $("copy").onclick = async () => {
+    const text = `HOOK\n${d.hook}\n\nBODY\n${d.body}\n\nCTA\n${d.cta}`;
+    try { await navigator.clipboard.writeText(text); $("copy").textContent = "Copied"; }
+    catch { $("copy").textContent = "Copy failed"; }
+    setTimeout(() => $("copy").textContent = "Copy script", 1500);
+  };
+}
+</script>
+</body>
+</html>

@@ -110,7 +110,8 @@ scriptbench/
   templates.py  offline fallback
   generator.py  the pipeline; generate() and generate_detailed()
   cli.py        command line
-  web.py        local browser UI (python -m scriptbench.web)
+  web.py        local browser UI server (python -m scriptbench.web)
+  index.html    the browser UI page: form, timing bar, hook candidates, checks
 run_samples.py  regenerates samples/
 tests/          unit tests with a fake model
 NOTE.md         what makes a script good
