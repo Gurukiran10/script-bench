@@ -1,0 +1,34 @@
+{
+  "input": {
+    "niche": "fitness",
+    "topic": "Why walking 8,000 steps a day beats a 30-minute HIIT class for most desk workers",
+    "target_seconds": 30
+  },
+  "hook": "Most people get this part of fitness wrong.",
+  "body": "Why walking 8,000 steps a day beats a 30-minute HIIT class for most desk workers.\n\nHere's what's actually going on. The obvious approach feels productive, but it's working against you.\n\nStep one: pick the smallest version of this you can do today. Not the perfect version, the smallest one.\n\nDo the simple thing consistently, and it beats the clever thing done once.",
+  "cta": "Save this for the next time you're stuck on fitness.",
+  "meta": {
+    "engine": "templates",
+    "target_seconds": 30,
+    "estimated_seconds": 32.8,
+    "spoken_words": 82,
+    "section_seconds": {
+      "hook": 3.2,
+      "body": 25.6,
+      "cta": 4.0
+    },
+    "budget": {
+      "target_seconds": 30,
+      "wps": 2.5,
+      "total_words": 75,
+      "hook_max": 14,
+      "body_words": 56,
+      "cta_words": 9,
+      "beats": 3,
+      "tolerance": 0.12
+    },
+    "score": 100,
+    "issues": [],
+    "generated_at": "2026-09-25T09:58:12+00:00"
+  }
+}

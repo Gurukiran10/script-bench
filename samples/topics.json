@@ -1,0 +1,8 @@
+[
+  {"niche": "personal finance", "topic": "I automated my savings and forgot about it for two years", "target_seconds": 45},
+  {"niche": "fitness", "topic": "Why walking 8,000 steps a day beats a 30-minute HIIT class for most desk workers", "target_seconds": 30},
+  {"niche": "home cooking", "topic": "A 10-minute weeknight pasta using only pantry staples", "target_seconds": 60},
+  {"niche": "tech careers", "topic": "The one habit that got me promoted from junior to mid-level developer in 14 months", "target_seconds": 45},
+  {"niche": "budget travel", "topic": "How to spend three days in Tokyo for under $300, not counting flights", "target_seconds": 60},
+  {"niche": "study skills", "topic": "Rereading your notes is the worst way to study for an exam", "target_seconds": 30}
+]

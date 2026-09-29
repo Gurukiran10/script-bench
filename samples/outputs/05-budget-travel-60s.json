@@ -1,0 +1,77 @@
+{
+  "input": {
+    "niche": "budget travel",
+    "topic": "How to spend three days in Tokyo for under $300, not counting flights",
+    "target_seconds": 60
+  },
+  "hook": "How does ninety-nine dollars a day buy you the ultimate Tokyo vacation?",
+  "body": "First, buy a seventy-two hour unlimited subway pass at the airport for only ten dollars. This covers every train ride you will need.\n\nNext, book a highly-rated capsule hotel in Shinjuku for thirty-five dollars a night. You get a clean, quiet pod and free toiletries.\n\nFor breakfast, skip western cafes. Grab a hot egg salad sandwich and a warm green tea from Lawson for under four dollars.\n\nFor dinner, use a ticket machine to order a massive, steaming bowl of authentic local tonkotsu ramen for only six dollars.\n\nSpend your days exploring the historic Senso-ji Temple and Shibuya Crossing. For the best skyline views, use the free observation deck at the Metropolitan Government Building.\n\nTo experience the culture, walk through the neon-lit streets of Akihabara. Window shopping costs absolutely nothing.",
+  "cta": "Save this video right now to plan your own budget trip to Tokyo.",
+  "meta": {
+    "engine": "gemini-3.5-flash",
+    "target_seconds": 60,
+    "estimated_seconds": 62.0,
+    "spoken_words": 155,
+    "section_seconds": {
+      "hook": 4.8,
+      "body": 52.0,
+      "cta": 5.2
+    },
+    "budget": {
+      "target_seconds": 60,
+      "wps": 2.5,
+      "total_words": 150,
+      "hook_max": 14,
+      "body_words": 122,
+      "cta_words": 18,
+      "beats": 5,
+      "tolerance": 0.12
+    },
+    "score": 100,
+    "issues": [],
+    "angle": "You can experience the absolute best of Tokyo's food, transit, and sights for under ninety-nine dollars a day.",
+    "hook_style": "curiosity_gap",
+    "hook_candidates": [
+      {
+        "style": "curiosity_gap",
+        "text": "How does ninety-nine dollars a day buy you the ultimate Tokyo vacation?",
+        "score": 110.0,
+        "reasons": [
+          "+specific",
+          "+direct_address",
+          "-question"
+        ]
+      },
+      {
+        "style": "bold_claim",
+        "text": "Three days in Tokyo costs less than a single weekend in Chicago.",
+        "score": 108.0,
+        "reasons": [
+          "+specific"
+        ]
+      },
+      {
+        "style": "mistake",
+        "text": "You are crossing Tokyo off your bucket list because you think it's too expensive.",
+        "score": 104.0,
+        "reasons": [
+          "+direct_address"
+        ]
+      }
+    ],
+    "revisions": 1,
+    "chosen_version": 1,
+    "version_scores": [
+      80,
+      100
+    ],
+    "verify": [
+      "72-hour Tokyo subway pass price (currently 1,500 yen, approx. $10 USD)",
+      "Average capsule hotel price in Shinjuku ($35 USD per night)",
+      "Lawson egg salad sandwich and green tea price (approx. 600 yen, under $4 USD)",
+      "Average budget ramen price (approx. 900 yen, under $6 USD)",
+      "Metropolitan Government Building observation deck is still free to the public"
+    ],
+    "generated_at": "2026-09-25T10:59:26+00:00"
+  }
+}

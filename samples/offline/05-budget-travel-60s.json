@@ -1,0 +1,40 @@
+{
+  "input": {
+    "niche": "budget travel",
+    "topic": "How to spend three days in Tokyo for under $300, not counting flights",
+    "target_seconds": 60
+  },
+  "hook": "Most people get this part of budget travel wrong.",
+  "body": "How to spend three days in Tokyo for under $300, not counting flights.\n\nHere's what's actually going on. The obvious approach feels productive, but it's working against you.\n\nStep one: pick the smallest version of this you can do today. Not the perfect version, the smallest one.\n\nStep two: make it the default, so you don't need willpower to keep doing it.\n\nStep three: measure one thing for two weeks. Just one. That's how you know it's working.\n\nMost people skip that last step, and that's exactly why they give up too early.\n\nDo the simple thing consistently, and it beats the clever thing done once.",
+  "cta": "Save this for the next time you're stuck on budget travel.",
+  "meta": {
+    "engine": "templates",
+    "target_seconds": 60,
+    "estimated_seconds": 50.8,
+    "spoken_words": 127,
+    "section_seconds": {
+      "hook": 3.6,
+      "body": 42.8,
+      "cta": 4.4
+    },
+    "budget": {
+      "target_seconds": 60,
+      "wps": 2.5,
+      "total_words": 150,
+      "hook_max": 14,
+      "body_words": 122,
+      "cta_words": 18,
+      "beats": 5,
+      "tolerance": 0.12
+    },
+    "score": 80,
+    "issues": [
+      {
+        "code": "too_short",
+        "severity": "hard",
+        "message": "The script runs about 51s (127 spoken words) against a 60s target. Add about 23 words to the body: a concrete example or detail, not filler."
+      }
+    ],
+    "generated_at": "2026-09-25T09:58:12+00:00"
+  }
+}

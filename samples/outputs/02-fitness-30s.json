@@ -1,0 +1,76 @@
+{
+  "input": {
+    "niche": "fitness",
+    "topic": "Why walking 8,000 steps a day beats a 30-minute HIIT class for most desk workers",
+    "target_seconds": 30
+  },
+  "hook": "You cannot sit for eight hours and fix it with one HIIT class.",
+  "body": "Sitting at your desk for eight hours straight—staring at a screen—puts your metabolism into a deep freeze.\n\nA sudden, thirty-minute HIIT class just spikes your stress hormones, makes you crash, and leaves you craving sugar.\n\nSpreading out eight thousand steps—with three short ten-minute walks during your breaks—keeps your fat-burning enzymes turned on all day.",
+  "cta": "Comment your average daily step count below.",
+  "meta": {
+    "engine": "gemini-3.5-flash",
+    "target_seconds": 30,
+    "estimated_seconds": 29.6,
+    "spoken_words": 74,
+    "section_seconds": {
+      "hook": 5.2,
+      "body": 21.6,
+      "cta": 2.8
+    },
+    "budget": {
+      "target_seconds": 30,
+      "wps": 2.5,
+      "total_words": 75,
+      "hook_max": 14,
+      "body_words": 56,
+      "cta_words": 9,
+      "beats": 3,
+      "tolerance": 0.12
+    },
+    "score": 100,
+    "issues": [],
+    "angle": "Constant low-intensity movement like walking prevents the metabolic slowdown caused by prolonged sitting, which a single intense workout cannot fix.",
+    "hook_style": "mistake",
+    "hook_candidates": [
+      {
+        "style": "mistake",
+        "text": "You cannot sit for eight hours and fix it with one HIIT class.",
+        "score": 112.0,
+        "reasons": [
+          "+specific",
+          "+direct_address"
+        ]
+      },
+      {
+        "style": "bold_claim",
+        "text": "A daily walk burns more fat than your exhausting thirty-minute HIIT workout.",
+        "score": 112.0,
+        "reasons": [
+          "+specific",
+          "+direct_address"
+        ]
+      },
+      {
+        "style": "curiosity_gap",
+        "text": "Why does your thirty-minute gym session fail to burn off your desk job?",
+        "score": 110.0,
+        "reasons": [
+          "+specific",
+          "+direct_address",
+          "-question"
+        ]
+      }
+    ],
+    "revisions": 1,
+    "chosen_version": 1,
+    "version_scores": [
+      80,
+      100
+    ],
+    "verify": [
+      "Whether three ten-minute walks are sufficient to reach or significantly contribute to the 8,000-step goal for an average desk worker.",
+      "The physiological claim that spreading steps keeps fat-burning enzymes (like lipoprotein lipase) active all day compared to a single bout of intense exercise."
+    ],
+    "generated_at": "2026-09-25T10:40:54+00:00"
+  }
+}

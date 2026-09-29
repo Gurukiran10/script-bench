@@ -1,0 +1,34 @@
+{
+  "input": {
+    "niche": "personal finance",
+    "topic": "I automated my savings and forgot about it for two years",
+    "target_seconds": 45
+  },
+  "hook": "I automated my savings and forgot about it for two years. Here's what happened.",
+  "body": "Here's the setup. I didn't plan anything clever. I made one decision and then left it alone.\n\nThe first few weeks felt like nothing was happening. That's the part where most people quit.\n\nThen the results started to compound, and I finally understood why the boring version works.\n\nThe mistake I almost made was checking on it every day and tweaking it. Doing less was the whole trick.\n\nIf I started again tomorrow, I'd do exactly the same thing, just sooner.\n\nSo here's the lesson: set it up once, make it automatic, and get out of your own way.",
+  "cta": "Follow if you want the next part of this personal finance story.",
+  "meta": {
+    "engine": "templates",
+    "target_seconds": 45,
+    "estimated_seconds": 50.0,
+    "spoken_words": 125,
+    "section_seconds": {
+      "hook": 5.6,
+      "body": 39.6,
+      "cta": 4.8
+    },
+    "budget": {
+      "target_seconds": 45,
+      "wps": 2.5,
+      "total_words": 112,
+      "hook_max": 14,
+      "body_words": 89,
+      "cta_words": 13,
+      "beats": 4,
+      "tolerance": 0.12
+    },
+    "score": 100,
+    "issues": [],
+    "generated_at": "2026-09-25T09:58:12+00:00"
+  }
+}

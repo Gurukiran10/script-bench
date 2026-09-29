@@ -1,0 +1,70 @@
+{
+  "input": {
+    "niche": "home cooking",
+    "topic": "A 10-minute weeknight pasta using only pantry staples",
+    "target_seconds": 60
+  },
+  "hook": "This three-ingredient pantry pasta tastes expensive but costs less than two dollars.",
+  "body": "Drop thin spaghetti into salted boiling water. It only needs six minutes. While it cooks, thinly slice four garlic cloves.\n\nPut the garlic in a cold pan with a generous pour of olive oil and a pinch of red pepper flakes.\n\nTurn the heat to medium. Starting cold infuses the oil deeply without burning the garlic. Now, scoop out a mug of that cloudy pasta water.\n\nAdd the pasta and half a cup of that water to your oil. Shake the pan fast. The starch binds the oil and water into a creamy sauce.\n\nYou do not need heavy cream or jarred sauce when basic kitchen science does the work for you.",
+  "cta": "Save this video for the next night you look at an empty fridge and want takeout.",
+  "meta": {
+    "engine": "gemini-3.5-flash",
+    "target_seconds": 60,
+    "estimated_seconds": 56.0,
+    "spoken_words": 140,
+    "section_seconds": {
+      "hook": 4.8,
+      "body": 44.8,
+      "cta": 6.4
+    },
+    "budget": {
+      "target_seconds": 60,
+      "wps": 2.5,
+      "total_words": 150,
+      "hook_max": 14,
+      "body_words": 122,
+      "cta_words": 18,
+      "beats": 5,
+      "tolerance": 0.12
+    },
+    "score": 100,
+    "issues": [],
+    "angle": "You can create a luxurious, glossy pasta sauce in ten minutes using just garlic, olive oil, and the starch from your pasta water.",
+    "hook_style": "curiosity_gap",
+    "hook_candidates": [
+      {
+        "style": "curiosity_gap",
+        "text": "This three-ingredient pantry pasta tastes expensive but costs less than two dollars.",
+        "score": 108.0,
+        "reasons": [
+          "+specific"
+        ]
+      },
+      {
+        "style": "mistake",
+        "text": "You are pouring your best pasta ingredient straight down the kitchen sink drain.",
+        "score": 104.0,
+        "reasons": [
+          "+direct_address"
+        ]
+      },
+      {
+        "style": "bold_claim",
+        "text": "You can cook a restaurant-quality dinner faster than ordering on an app.",
+        "score": 104.0,
+        "reasons": [
+          "+direct_address"
+        ]
+      }
+    ],
+    "revisions": 0,
+    "chosen_version": 0,
+    "version_scores": [
+      100
+    ],
+    "verify": [
+      "Confirm the cooking time of your chosen thin spaghetti brand is under 8 minutes to keep the total recipe under 10 minutes."
+    ],
+    "generated_at": "2026-09-25T10:46:56+00:00"
+  }
+}

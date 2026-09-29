@@ -1,0 +1,70 @@
+{
+  "input": {
+    "niche": "tech careers",
+    "topic": "The one habit that got me promoted from junior to mid-level developer in 14 months",
+    "target_seconds": 45
+  },
+  "hook": "I went from junior to mid-level developer in fourteen months with one habit.",
+  "body": "They care about how much time you save them. I got promoted fast because of my pull requests.\n\nBefore submitting code, I wrote a three-sentence summary. What I changed, why I chose that approach, and the trade-offs.\n\nThis meant my senior devs did not have to guess my thinking. Reviews went from days to instant approval.\n\nSeniors do not just write code, they unblock the team. Prove you can communicate and they will promote you.",
+  "cta": "Comment template and I will send you the exact PR layout I used.",
+  "meta": {
+    "engine": "gemini-3.5-flash",
+    "target_seconds": 45,
+    "estimated_seconds": 40.4,
+    "spoken_words": 101,
+    "section_seconds": {
+      "hook": 5.2,
+      "body": 30.0,
+      "cta": 5.2
+    },
+    "budget": {
+      "target_seconds": 45,
+      "wps": 2.5,
+      "total_words": 112,
+      "hook_max": 14,
+      "body_words": 89,
+      "cta_words": 13,
+      "beats": 4,
+      "tolerance": 0.12
+    },
+    "score": 100,
+    "issues": [],
+    "angle": "Writing a three-sentence 'why' summary on every pull request gets you promoted faster than writing perfect code.",
+    "hook_style": "specific_result",
+    "hook_candidates": [
+      {
+        "style": "specific_result",
+        "text": "I went from junior to mid-level developer in fourteen months with one habit.",
+        "score": 112.0,
+        "reasons": [
+          "+specific",
+          "+first_person"
+        ]
+      },
+      {
+        "style": "in_media_res",
+        "text": "My tech lead stared at my screen and said, stop writing code.",
+        "score": 104.0,
+        "reasons": [
+          "+first_person"
+        ]
+      },
+      {
+        "style": "bold_claim",
+        "text": "Your senior developers do not care how clean your code is.",
+        "score": 100.0,
+        "reasons": []
+      }
+    ],
+    "revisions": 0,
+    "chosen_version": 0,
+    "version_scores": [
+      100
+    ],
+    "verify": [
+      "fourteen months",
+      "three-sentence summary"
+    ],
+    "generated_at": "2026-09-25T10:50:00+00:00"
+  }
+}

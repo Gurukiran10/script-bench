@@ -1,0 +1,69 @@
+{
+  "input": {
+    "niche": "personal finance",
+    "topic": "I automated my savings and forgot about it for two years",
+    "target_seconds": 45
+  },
+  "hook": "I forgot about a hidden transfer for two years and found five-thousand dollars.",
+  "body": "Two years ago, I set up an automatic transfer of fifty dollars a week to a separate high-yield savings account.\n\nThen, I deleted the banking app from my phone and completely forgot the account even existed.\n\nI didn't have to choose between a coffee or saving because the decision was already made.\n\nWhen I checked it yesterday, five thousand two hundred dollars was just sitting there waiting for me. If you rely on willpower to save, you lose. Let your software do the hard work.",
+  "cta": "Comment the word AUTOMATE and I will send you my setup guide.",
+  "meta": {
+    "engine": "gemini-3.5-flash",
+    "target_seconds": 45,
+    "estimated_seconds": 44.0,
+    "spoken_words": 110,
+    "section_seconds": {
+      "hook": 5.2,
+      "body": 34.0,
+      "cta": 4.8
+    },
+    "budget": {
+      "target_seconds": 45,
+      "wps": 2.5,
+      "total_words": 112,
+      "hook_max": 14,
+      "body_words": 89,
+      "cta_words": 13,
+      "beats": 4,
+      "tolerance": 0.12
+    },
+    "score": 100,
+    "issues": [],
+    "angle": "Automating your savings is the only way to build wealth without relying on willpower.",
+    "hook_style": "specific_result",
+    "hook_candidates": [
+      {
+        "style": "specific_result",
+        "text": "I forgot about a hidden transfer for two years and found five-thousand dollars.",
+        "score": 112.0,
+        "reasons": [
+          "+specific",
+          "+first_person"
+        ]
+      },
+      {
+        "style": "in_media_res",
+        "text": "I logged into an old bank account and gasped at the balance.",
+        "score": 104.0,
+        "reasons": [
+          "+first_person"
+        ]
+      },
+      {
+        "style": "bold_claim",
+        "text": "The best way to save money is to literally forget you have it.",
+        "score": 100.0,
+        "reasons": []
+      }
+    ],
+    "revisions": 0,
+    "chosen_version": 0,
+    "version_scores": [
+      100
+    ],
+    "verify": [
+      "Verify the weekly transfer amount of fifty dollars and the final balance of five thousand two hundred dollars to match your actual savings history."
+    ],
+    "generated_at": "2026-09-25T10:28:05+00:00"
+  }
+}

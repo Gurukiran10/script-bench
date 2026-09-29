@@ -1,0 +1,75 @@
+{
+  "input": {
+    "niche": "study skills",
+    "topic": "Rereading your notes is the worst way to study for an exam",
+    "target_seconds": 30
+  },
+  "hook": "Stop rereading your notes if you want to pass your exam tomorrow.",
+  "body": "When you reread, your brain mistakes recognition for learning. You think you know it just because it looks familiar.\n\nBut recognition is passive. To actually lock it in, you have to force your brain to retrieve the information.\n\nClose the book and test yourself instead. If it doesn't feel hard, you aren't studying.",
+  "cta": "Save this video to use before your next exam.",
+  "meta": {
+    "engine": "gemini-3.5-flash",
+    "target_seconds": 30,
+    "estimated_seconds": 29.6,
+    "spoken_words": 74,
+    "section_seconds": {
+      "hook": 4.8,
+      "body": 21.2,
+      "cta": 3.6
+    },
+    "budget": {
+      "target_seconds": 30,
+      "wps": 2.5,
+      "total_words": 75,
+      "hook_max": 14,
+      "body_words": 56,
+      "cta_words": 9,
+      "beats": 3,
+      "tolerance": 0.12
+    },
+    "score": 95,
+    "issues": [
+      {
+        "code": "body_vague",
+        "severity": "soft",
+        "message": "The body has no concrete number or quantity. Add one specific detail the viewer can picture."
+      }
+    ],
+    "angle": "Rereading your notes feels like studying but actually tricks your brain into forgetting everything on exam day.",
+    "hook_style": "mistake",
+    "hook_candidates": [
+      {
+        "style": "mistake",
+        "text": "Stop rereading your notes if you want to pass your exam tomorrow.",
+        "score": 104.0,
+        "reasons": [
+          "+direct_address"
+        ]
+      },
+      {
+        "style": "bold_claim",
+        "text": "Rereading your notes is the single biggest waste of your study time.",
+        "score": 104.0,
+        "reasons": [
+          "+direct_address"
+        ]
+      },
+      {
+        "style": "curiosity_gap",
+        "text": "Why do you remember your notes at home but forget them on the test?",
+        "score": 102.0,
+        "reasons": [
+          "+direct_address",
+          "-question"
+        ]
+      }
+    ],
+    "revisions": 0,
+    "chosen_version": 0,
+    "version_scores": [
+      95
+    ],
+    "verify": [],
+    "generated_at": "2026-09-25T11:02:38+00:00"
+  }
+}
