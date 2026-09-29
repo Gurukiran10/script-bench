@@ -2,6 +2,7 @@ import unittest
 
 from scriptbench import critic, generate, generate_detailed
 from scriptbench.hooks import choose_archetypes, is_story, rank_hooks
+from scriptbench.llm import FallbackClient, LLMError
 from scriptbench.timing import plan_budget, spoken_words
 
 GOOD_BODY = (
@@ -123,6 +124,32 @@ class GeneratorTests(unittest.TestCase):
         result = generate_detailed("personal finance", "I automated my savings", 30, client=client)
         self.assertEqual(result.meta["chosen_version"], 0)
         self.assertEqual(result.meta["revisions"], 2)
+
+
+class FallbackTests(unittest.TestCase):
+    class Model:
+        def __init__(self, model, error=None):
+            self.model, self.error, self.calls = model, error, 0
+
+        def generate_json(self, system, prompt, schema, temperature):
+            self.calls += 1
+            if self.error:
+                raise self.error
+            return {"ok": self.model}
+
+    def test_moves_past_overloaded_model_and_remembers_it(self):
+        busy = self.Model("busy", LLMError("503", transient=True))
+        good = self.Model("good")
+        client = FallbackClient([busy, good])
+        self.assertEqual(client.generate_json("", "", {}, 0), {"ok": "good"})
+        client.generate_json("", "", {}, 0)
+        self.assertEqual(busy.calls, 1)  # second call starts from the model that worked
+        self.assertEqual(client.model, "good")
+
+    def test_does_not_hide_permanent_errors(self):
+        client = FallbackClient([self.Model("bad-key", LLMError("401")), self.Model("good")])
+        with self.assertRaises(LLMError):
+            client.generate_json("", "", {}, 0)
 
 
 if __name__ == "__main__":

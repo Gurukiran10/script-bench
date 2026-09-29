@@ -55,7 +55,13 @@ Options:
 | `--offline` | skip the LLM and use the rules-only fallback |
 | `--wps 2.8` | speaking rate for a faster talker |
 
-Gemini defaults to `gemini-3.5-flash` and Groq to `llama-3.3-70b-versatile`. Override them with `GEMINI_MODEL` / `GROQ_MODEL`. If both keys are set, Gemini is used unless `SCRIPTBENCH_PROVIDER=groq`.
+**In the browser:** run the command below, then open <http://127.0.0.1:8000>. It's a small local page (standard library only) with the same generator behind it, plus a view of every hook candidate and its score. It only listens on your own machine, so your API key and quota stay private.
+
+```bash
+python -m scriptbench.web
+```
+
+**Models:** Gemini tries `gemini-3.5-flash`, then `gemini-3.7-flash`, `gemini-3.8-flash` and `gemini-flash-latest`. It moves to the next model only when one is overloaded or unreachable. A bad key or a bad request fails immediately instead of being retried somewhere else. After a fallback, later calls in the same run start from the model that worked. To pin a single model or set your own chain, use `GEMINI_MODEL` (comma-separated). Groq defaults to `llama-3.3-70b-versatile`, which you can change with `GROQ_MODEL`. If both keys are set, Gemini is used unless `SCRIPTBENCH_PROVIDER=groq`.
 
 **Why two providers:** the pipeline only depends on a `generate_json(system, prompt, schema)` interface. Gemini enforces the JSON schema server-side. Groq's JSON mode only guarantees valid JSON, so its client puts the schema in the prompt instead. In both cases the critic re-checks everything the model returns. Swapping providers is a config change, not a code change. It paid off while building this: Gemini was overloaded for hours during development.
 
@@ -104,6 +110,7 @@ scriptbench/
   templates.py  offline fallback
   generator.py  the pipeline; generate() and generate_detailed()
   cli.py        command line
+  web.py        local browser UI (python -m scriptbench.web)
 run_samples.py  regenerates samples/
 tests/          unit tests with a fake model
 NOTE.md         what makes a script good

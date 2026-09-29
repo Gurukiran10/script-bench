@@ -5,11 +5,13 @@ Two providers behind one interface, `generate_json`:
   - Groq    (GROQ_API_KEY)    OpenAI-compatible JSON mode; the schema goes in the prompt
 
 The pipeline only ever sees the JSONModel protocol, so the provider is a config
-choice, not a code change.
+choice, not a code change. FallbackClient chains several models so one
+overloaded model doesn't take the whole tool down.
 """
 from __future__ import annotations
 
 import json
+import logging
 import os
 import time
 import urllib.error
@@ -17,15 +19,22 @@ import urllib.request
 from pathlib import Path
 from typing import Any, Protocol
 
-GEMINI_DEFAULT_MODEL = "gemini-3.5-flash"
+# Tried in order; the next one is used only if the previous is overloaded or unreachable.
+GEMINI_DEFAULT_MODELS = ("gemini-3.5-flash", "gemini-3.7-flash", "gemini-3.8-flash", "gemini-flash-latest")
 GROQ_DEFAULT_MODEL = "llama-3.3-70b-versatile"
 _GEMINI_ENDPOINT = "https://generativelanguage.googleapis.com/v1beta/models/{model}:generateContent"
 _GROQ_ENDPOINT = "https://api.groq.com/openai/v1/chat/completions"
 _RETRYABLE = {429, 500, 502, 503, 504}
 
+log = logging.getLogger(__name__)
+
 
 class LLMError(RuntimeError):
-    pass
+    def __init__(self, message: str, transient: bool = False):
+        super().__init__(message)
+        # True when another model (or a later attempt) might succeed:
+        # overloaded, rate-limited, timed out. False for bad keys and bad requests.
+        self.transient = transient
 
 
 class JSONModel(Protocol):
@@ -37,7 +46,7 @@ class JSONModel(Protocol):
 
 
 class GeminiClient:
-    def __init__(self, api_key: str, model: str = GEMINI_DEFAULT_MODEL, timeout: float = 150, retries: int = 5):
+    def __init__(self, api_key: str, model: str = GEMINI_DEFAULT_MODELS[0], timeout: float = 120, retries: int = 5):
         self.api_key = api_key
         self.model = model
         self.timeout = timeout
@@ -100,6 +109,44 @@ class GroqClient:
         return _load_json(text, "Groq")
 
 
+class FallbackClient:
+    """Tries each client in order, moving on only when one is overloaded or unreachable.
+
+    After a success it starts from that client next time, so a revision round
+    doesn't wait on a model that just failed.
+    """
+
+    def __init__(self, clients: list[JSONModel]):
+        if not clients:
+            raise ValueError("FallbackClient needs at least one client")
+        self.clients = clients
+        self.used: list[str] = []
+        self._start = 0
+
+    @property
+    def model(self) -> str:
+        """The model(s) that actually answered, e.g. 'gemini-3.7-flash'."""
+        return ", ".join(dict.fromkeys(self.used)) or self.clients[0].model
+
+    def generate_json(self, system: str, prompt: str, schema: dict[str, Any], temperature: float) -> dict[str, Any]:
+        last_error: LLMError | None = None
+        for index in range(self._start, len(self.clients)):
+            client = self.clients[index]
+            try:
+                result = client.generate_json(system, prompt, schema, temperature)
+            except LLMError as err:
+                if not err.transient:
+                    raise
+                log.warning("%s unavailable, falling back to the next model", client.model)
+                last_error = err
+                continue
+            self._start = index
+            self.used.append(client.model)
+            return result
+        assert last_error is not None
+        raise last_error
+
+
 def _post_json(url: str, headers: dict[str, str], payload: dict[str, Any],
                timeout: float, retries: int, provider: str) -> dict[str, Any]:
     request = urllib.request.Request(
@@ -117,12 +164,13 @@ def _post_json(url: str, headers: dict[str, str], payload: dict[str, Any],
             if err.code in _RETRYABLE and attempt < retries - 1:
                 time.sleep(_retry_delay(detail, attempt, err.headers.get("retry-after")))
                 continue
-            raise LLMError(f"{provider} API returned HTTP {err.code}: {detail[:500]}") from err
+            raise LLMError(f"{provider} API returned HTTP {err.code}: {detail[:500]}",
+                           transient=err.code in _RETRYABLE) from err
         except (urllib.error.URLError, TimeoutError) as err:
             if attempt < retries - 1:
                 time.sleep(2 ** (attempt + 1))
                 continue
-            raise LLMError(f"Could not reach the {provider} API: {err}") from err
+            raise LLMError(f"Could not reach the {provider} API: {err}", transient=True) from err
     raise LLMError("unreachable")  # loop always returns or raises
 
 
@@ -169,7 +217,12 @@ def client_from_env() -> JSONModel | None:
     provider = os.environ.get("SCRIPTBENCH_PROVIDER", "").lower() or ("gemini" if gemini_key else "groq" if groq_key else "")
 
     if provider == "gemini" and gemini_key:
-        return GeminiClient(gemini_key, model=os.environ.get("GEMINI_MODEL", GEMINI_DEFAULT_MODEL))
+        # GEMINI_MODEL may be one model or a comma-separated fallback chain.
+        chain = os.environ.get("GEMINI_MODEL", ",".join(GEMINI_DEFAULT_MODELS))
+        models = [m.strip() for m in chain.split(",") if m.strip()]
+        if len(models) == 1:
+            return GeminiClient(gemini_key, model=models[0])
+        return FallbackClient([GeminiClient(gemini_key, model=m, retries=2) for m in models])
     if provider == "groq" and groq_key:
         return GroqClient(groq_key, model=os.environ.get("GROQ_MODEL", GROQ_DEFAULT_MODEL))
     return None
