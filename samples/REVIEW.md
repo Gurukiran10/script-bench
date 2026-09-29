@@ -14,16 +14,22 @@ The outputs in [`outputs/SAMPLES.md`](outputs/SAMPLES.md) are unedited. This is 
 | # | Problem | Why the rules missed it |
 |---|---|---|
 | 1 finance | $50/week × 104 weeks is exactly $5,200, so the "high-yield" account earned nothing. The CTA also promises a setup guide the creator may not have. | Rules can't do arithmetic on claims or know what the creator can deliver. |
-| 2 fitness | "Three ten-minute walks" is ~3,000 steps, not 8,000. "HIIT makes you crash and crave sugar" is overstated. | It's flagged in `verify`, but a script with a wrong number still passes. |
-| 3 cooking | The hook says "three-ingredient", but the body uses spaghetti, garlic, olive oil and chilli flakes. | The hook's promise and the body's delivery are only checked by the prompt, never by code. |
-| 4 careers | The body opens "They care about…" with no antecedent. The first sentence of beat 1 got lost. The verify list includes "fourteen months", which the creator gave us. | Coherence across sentences is invisible to regex checks. |
+| 2 fitness | "Three ten-minute walks" is ~3,000 steps, not 8,000. "Metabolism into a deep freeze", "HIIT makes you crash and crave sugar" and "fat-burning enzymes turned on all day" are not overstatements. They're wrong. I wouldn't let a creator film this as written. | It's flagged in `verify`, but a script with false claims still passes every rule. |
+| 3 cooking | The hook says "three-ingredient", but the body uses spaghetti, garlic, olive oil and chilli flakes. That hook won 108–104 purely on the ranker's +8 bonus for containing a number. The runner-up ("You are pouring your best pasta ingredient straight down the kitchen sink drain") was *true* to the body, which is about pasta water. | **My ranker caused this.** It rewarded "has a number" without knowing whether the number was right. |
+| 4 careers | The body opens "They care about…" with nothing for "they" to refer to. That line continues a *rejected* hook ("Your senior developers do not care how clean your code is"). The model wrote the body to follow that hook, and my ranker then picked a different one. The verify list also includes "fourteen months", which the creator gave us. | **My pipeline caused this.** The body is written once, but the hook is chosen afterwards, and nothing guaranteed the body worked after every hook. |
 | 5 travel | The hook promises $99/day, but the body never adds the costs up to show it. | Same hook→body promise gap as #3. |
 | 6 study | Solid. The critic's only complaint (no number in the body) is arguably wrong here: a number would be padding. | The "add a specific number" rule is a heuristic, which is why it's *soft*. |
 
 ## What this tells me
 
-1. **The rules work as a floor, not a ceiling.** They reliably stop bad formats (wrong length, warm-ups, multiple asks, stage directions). They say nothing about whether the script is *true* or *coherent*.
-2. **The biggest remaining failure is hook-promise drift** (#3, #5). The angle-first prompt reduced it but didn't eliminate it. The next thing I'd build is one extra LLM check: "Does the body deliver exactly what the hook promises? Quote the line that does." Its answer would be fed into the same revision loop.
-3. **Consistency checks on numbers** (#1, #2) are the second priority. The model already lists its numbers under `verify`, so a follow-up pass could check whether they're consistent with each other.
+1. **Two of the six failures were caused by my own design, not the model** (#3, #4). Choosing the hook *after* the body is written only works if the body fits every hook. A ranker that rewards "has a number" will pick a wrong number over a true statement.
+2. **The rules work as a floor, not a ceiling.** They reliably stop bad formats (wrong length, warm-ups, multiple asks, stage directions). They say nothing about whether the script is *true* or *coherent*.
+3. **Hook-promise drift** (#3, #5) is the biggest remaining failure. The next thing I'd build is one extra LLM check: "Does the body deliver exactly what the hook promises? Quote the line that does." Its answer would be fed into the same revision loop.
+4. **Consistency checks on numbers** (#1, #2) come next. The model already lists its numbers under `verify`, so a follow-up pass could check whether they're consistent with each other.
 
-I've left all of these in the outputs on purpose. The brief asked for unedited outputs, and they're more useful as evidence than hidden.
+## What I changed after this review
+
+- **The body must work after any of the three hooks.** The draft prompt now says only one hook will be used, so beat 1 must stand on its own and never continue or point back to a specific hook. It also says every specific a hook names must be true of the body. This fixes the cause of #4.
+- **The number bonus is now a nudge, not a trump card** (+8 → +3). Re-scoring the saved cooking candidates with the new weights, the true "pasta water" hook wins over the false "three-ingredient" one. This fixes the cause of #3.
+
+I've left the outputs above unedited and haven't regenerated them. The brief asked for outputs exactly as generated, and they're the evidence for these changes. A fresh run (`python run_samples.py --fresh`) uses the fixed pipeline.

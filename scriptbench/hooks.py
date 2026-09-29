@@ -3,8 +3,8 @@
 A single hook from an LLM tends toward the safe middle. Asking for three
 hooks in *deliberately different* styles, all promising the same payoff, gives
 the ranker real alternatives. The ranker is a filter, not a judge of taste: it
-throws out hooks that break the rules and prefers short, specific, personal
-ones.
+heavily penalises hooks that break the rules and mildly prefers short, specific,
+personal ones.
 """
 from __future__ import annotations
 
@@ -60,8 +60,11 @@ def score_hook(text: str, budget: Budget, story: bool) -> RankedHook:
         points -= 20 if issue.severity == HARD else 5
         reasons.append(f"-{issue.code}")
 
+    # A small nudge, not a trump card: with a big bonus the ranker picked
+    # number-heavy hooks even when the number was wrong ("three-ingredient"
+    # pasta with four ingredients).
     if has_specific(text):
-        points += 8
+        points += 3
         reasons.append("+specific")
     # The story hooks should sound like the creator, the explainer hooks
     # should talk to the viewer.

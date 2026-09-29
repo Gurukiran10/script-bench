@@ -1,8 +1,10 @@
+import os
 import unittest
+import unittest.mock
 
 from scriptbench import critic, generate, generate_detailed
 from scriptbench.hooks import choose_archetypes, is_story, rank_hooks
-from scriptbench.llm import FallbackClient, LLMError
+from scriptbench.llm import FallbackClient, LLMError, client_from_env
 from scriptbench.timing import plan_budget, spoken_words
 
 GOOD_BODY = (
@@ -150,6 +152,15 @@ class FallbackTests(unittest.TestCase):
         client = FallbackClient([self.Model("bad-key", LLMError("401")), self.Model("good")])
         with self.assertRaises(LLMError):
             client.generate_json("", "", {}, 0)
+
+
+class ProviderConfigTests(unittest.TestCase):
+    def test_explicit_provider_without_its_key_fails_loudly(self):
+        env = {"SCRIPTBENCH_PROVIDER": "groq", "GEMINI_API_KEY": "x"}
+        with unittest.mock.patch.dict(os.environ, env, clear=True), \
+                unittest.mock.patch("scriptbench.llm.load_dotenv"):
+            with self.assertRaisesRegex(LLMError, "GROQ_API_KEY is not set"):
+                client_from_env()
 
 
 if __name__ == "__main__":

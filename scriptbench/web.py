@@ -35,6 +35,8 @@ class Handler(BaseHTTPRequestHandler):
             return
         try:
             data = json.loads(self.rfile.read(length) or b"{}")
+            if not isinstance(data, dict):
+                raise ValueError("expected a JSON object with niche, topic and seconds")
             result = generate_detailed(
                 str(data.get("niche", "")),
                 str(data.get("topic", "")),
@@ -49,7 +51,11 @@ class Handler(BaseHTTPRequestHandler):
                        if err.transient else str(err).split("\n")[0])
             self._json(503, {"error": message, "transient": err.transient})
             return
-        self._json(200, {**result.script, "meta": result.meta})
+        payload = {**result.script, "meta": result.meta}
+        if result.meta["engine"] == "templates" and not data.get("offline"):
+            payload["notice"] = ("No API key found, so this is the quick template instead of the AI writer. "
+                                 "Add GEMINI_API_KEY (or GROQ_API_KEY) to .env and restart to use the AI writer.")
+        self._json(200, payload)
 
     def _json(self, status: int, payload: dict) -> None:
         self._send(status, "application/json", json.dumps(payload, ensure_ascii=False).encode("utf-8"))

@@ -331,6 +331,7 @@ function render(d) {
     </div>
 
     <div class="extras">
+      ${d.notice ? `<div class="box verify"><h3>Heads up</h3>${esc(d.notice)}</div>` : ""}
       ${verify ? `<div class="box verify"><h3>Check before filming</h3><ul>${verify}</ul></div>` : ""}
       ${issues ? `<div class="box"><h3>What the checker flagged</h3><ul>${issues}</ul></div>`
                : `<div class="box"><h3>What the checker flagged</h3>Nothing. It passed every check.</div>`}

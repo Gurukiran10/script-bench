@@ -214,7 +214,16 @@ def client_from_env() -> JSONModel | None:
     load_dotenv(Path.cwd() / ".env")
     gemini_key = os.environ.get("GEMINI_API_KEY") or os.environ.get("GOOGLE_API_KEY")
     groq_key = os.environ.get("GROQ_API_KEY")
-    provider = os.environ.get("SCRIPTBENCH_PROVIDER", "").lower() or ("gemini" if gemini_key else "groq" if groq_key else "")
+    chosen = os.environ.get("SCRIPTBENCH_PROVIDER", "").strip().lower()
+    if chosen:
+        # An explicit choice must be honoured or fail loudly, never silently fall back to templates.
+        needed = {"gemini": gemini_key, "groq": groq_key}
+        if chosen not in needed:
+            raise LLMError(f"SCRIPTBENCH_PROVIDER must be 'gemini' or 'groq', got {chosen!r}")
+        if not needed[chosen]:
+            key_name = "GEMINI_API_KEY" if chosen == "gemini" else "GROQ_API_KEY"
+            raise LLMError(f"SCRIPTBENCH_PROVIDER={chosen} but {key_name} is not set")
+    provider = chosen or ("gemini" if gemini_key else "groq" if groq_key else "")
 
     if provider == "gemini" and gemini_key:
         # GEMINI_MODEL may be one model or a comma-separated fallback chain.

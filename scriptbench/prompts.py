@@ -71,7 +71,11 @@ can open the same body.
 {styles}
 
 3. body_beats: exactly {budget.beats} beats, about {budget.body_words} words in total.
-   - Beat 1 pays off the hook straight away. No warm-up, no restating the hook.
+   - Only ONE of the hooks will be used, and you don't know which. The body must read naturally after \
+any of them: beat 1 must stand on its own, never continuing a specific hook's sentence or pointing back \
+to it ("they", "that", "this is why").
+   - Beat 1 pays off the promise straight away. No warm-up, no restating the hook.
+   - Every specific a hook names (a count, a price, a timeframe) must be true of the body.
    - Each beat adds one new thing: a step, a proof, an example, a turn.
    - The last beat lands the takeaway in one line someone would repeat to a friend.
 
