@@ -36,18 +36,11 @@
   h1 { margin: 0; font-size: 24px; letter-spacing: -.01em; }
   .tagline { margin: 2px 0 0; color: var(--muted); }
 
-  /* How it works */
-  .steps { list-style: none; margin: 24px 0 28px; padding: 0; display: grid;
-           grid-template-columns: repeat(5, 1fr); gap: 8px; counter-reset: s; }
-  .steps li { background: var(--panel); border: 1px solid var(--line); border-radius: 10px; padding: 10px 12px;
-              font-size: 13px; color: var(--muted); counter-increment: s; }
-  .steps b { display: block; color: var(--ink); font-size: 13px; }
-  .steps b::before { content: counter(s) ". "; color: var(--faint); font-weight: 600; }
-  .who { font-size: 11px; font-weight: 700; letter-spacing: .05em; text-transform: uppercase; }
-  .who.ai { color: var(--accent); } .who.code { color: var(--faint); }
-
   /* Layout */
-  .grid { display: grid; grid-template-columns: 360px 1fr; gap: 20px; align-items: start; }
+  .grid { display: grid; grid-template-columns: 360px 1fr; gap: 20px; align-items: start; margin-top: 28px; }
+  .how { max-width: 640px; margin: 32px auto 0; color: var(--muted); font-size: 14px; text-align: center; }
+  .how summary { cursor: pointer; color: var(--accent); font-weight: 600; }
+  .how p { margin: 10px 0 0; }
   .panel { background: var(--panel); border: 1px solid var(--line); border-radius: 14px; box-shadow: var(--shadow); }
 
   /* Form */
@@ -127,7 +120,6 @@
   th { font-size: 11px; text-transform: uppercase; letter-spacing: .05em; color: var(--faint); }
   tr.win td { font-weight: 600; }
   .win-mark { color: var(--good); font-weight: 800; }
-  .reasons { color: var(--faint); font-size: 12px; }
   details summary { cursor: pointer; font-weight: 600; font-size: 13px; }
   details[open] summary { margin-bottom: 8px; }
 
@@ -136,11 +128,9 @@
   @media (max-width: 880px) {
     .grid { grid-template-columns: 1fr; }
     form { position: static; }
-    .steps { grid-template-columns: repeat(2, 1fr); }
   }
   @media (max-width: 480px) {
     .wrap { padding: 20px 16px 48px; }
-    .steps { grid-template-columns: 1fr; }
     .part { grid-template-columns: 1fr; gap: 4px; }
   }
 </style>
@@ -156,14 +146,6 @@
       </div>
     </div>
   </header>
-
-  <ol class="steps" aria-label="How it works">
-    <li><span class="who code">Code</span><b>Plan</b>Seconds become a word budget (~2.5 words/sec)</li>
-    <li><span class="who ai">AI</span><b>Draft</b>One core idea, 3 hooks in different styles, body, CTA</li>
-    <li><span class="who code">Code</span><b>Pick hook</b>Scores the 3 hooks and keeps the strongest</li>
-    <li><span class="who code">Code</span><b>Check</b>Length, cliches, one clear ask, read-aloud problems</li>
-    <li><span class="who ai">AI</span><b>Revise</b>Fixes only what the check flagged, then the best version wins</li>
-  </ol>
 
   <div class="grid">
     <form id="form" class="panel" autocomplete="off">
@@ -182,10 +164,10 @@
 
       <span class="label" id="mode-label">Writer</span>
       <div class="seg" role="radiogroup" aria-labelledby="mode-label">
-        <input type="radio" name="mode" id="m-ai" value="ai" checked><label for="m-ai">AI + checks</label>
-        <input type="radio" name="mode" id="m-off" value="offline"><label for="m-off">Templates only</label>
+        <input type="radio" name="mode" id="m-ai" value="ai" checked><label for="m-ai">AI writer</label>
+        <input type="radio" name="mode" id="m-off" value="offline"><label for="m-off">Quick template</label>
       </div>
-      <p class="hint" id="mode-hint">Gemini writes, code checks and corrects. Takes 10&ndash;60 seconds.</p>
+      <p class="hint" id="mode-hint">Writes an original script for your topic. Takes 10&ndash;60 seconds.</p>
 
       <button class="primary" id="go" type="submit">Generate script</button>
 
@@ -204,7 +186,14 @@
     </section>
   </div>
 
-  <footer>Runs on your own computer. Your API key never leaves this machine.</footer>
+  <details class="how">
+    <summary>How does it work?</summary>
+    <p>It works out how many words fit in your video length, then writes three different opening lines and
+       keeps the strongest one. Before showing you the script, it checks that it fits the time, sounds natural
+       out loud and ends with one clear ask, and it rewrites anything that doesn't.</p>
+  </details>
+
+  <footer>Script Bench runs on your own computer.</footer>
 </div>
 
 <script>
@@ -215,8 +204,13 @@ const EXAMPLES = [
   ["budget travel", "How to spend three days in Tokyo for under $300, not counting flights", 60],
   ["tech careers", "The one habit that got me promoted from junior to mid-level developer in 14 months", 45],
 ];
-const STEPS = ["Planning the word budget", "Drafting the idea, 3 hooks and the body",
-               "Scoring the hooks", "Checking length and clarity", "Fixing anything flagged"];
+const STEPS = ["Working out how many words fit", "Writing three different opening lines",
+               "Picking the strongest one", "Checking it fits the time and sounds natural", "Polishing"];
+
+const STYLE_NAMES = {
+  in_media_res: "Starts mid-story", specific_result: "Leads with the result", bold_claim: "Bold claim",
+  mistake: "Names a mistake", curiosity_gap: "Raises a question", direct_callout: "Calls out the viewer",
+};
 
 const $ = id => document.getElementById(id);
 const esc = s => String(s).replace(/[&<>"']/g, c =>
@@ -234,13 +228,13 @@ for (const [niche, topic, secs] of EXAMPLES) {
 
 document.querySelectorAll("input[name=mode]").forEach(r => r.addEventListener("change", () => {
   $("mode-hint").textContent = mode() === "ai"
-    ? "Gemini writes, code checks and corrects. Takes 10–60 seconds."
-    : "No AI: fixed templates. Instant, but generic. Useful as a comparison.";
+    ? "Writes an original script for your topic. Takes 10–60 seconds."
+    : "Instant fill-in-the-blanks version. Works offline, but reads generic.";
 }));
 
 let timer;
 function showLoading(ai) {
-  const items = (ai ? STEPS : ["Filling templates", "Checking length and clarity"])
+  const items = (ai ? STEPS : ["Filling in the template", "Checking it fits the time"])
     .map(s => `<li>${s}</li>`).join("");
   $("result").innerHTML = `<div class="loading"><b>${ai ? "Writing your script…" : "Building…"}</b><ol>${items}</ol></div>`;
   const lis = [...$("result").querySelectorAll("li")];
@@ -276,8 +270,8 @@ $("form").addEventListener("submit", async e => {
 
 function showError(d) {
   const tip = d.transient
-    ? `<p>This is on Google's side, not yours. Wait a minute and try again, or switch <b>Writer</b> to <b>Templates only</b> to see the pipeline work offline.</p>
-       <button class="ghost" type="button" onclick="$('m-off').click(); $('go').click()">Run with templates</button>`
+    ? `<p>The AI service is overloaded right now. Wait a minute and try again, or use the quick template instead.</p>
+       <button class="ghost" type="button" onclick="$('m-off').click(); $('go').click()">Use quick template</button>`
     : "";
   $("result").innerHTML = `<div class="error"><h2>Couldn't generate a script</h2><p>${esc(d.error)}</p>${tip}</div>`;
 }
@@ -289,7 +283,7 @@ function render(d) {
   const pct = x => (x / scale * 100).toFixed(2) + "%";
   const timingClass = off <= 0.12 ? "good" : "bad";
   const scoreClass = m.score >= 90 ? "good" : m.score >= 70 ? "warn" : "bad";
-  const engine = m.engine === "templates" ? "Templates only" : m.engine;
+  const engine = m.engine === "templates" ? "Quick template" : "AI writer";
 
   const issues = m.issues.map(i =>
     `<li><span class="sev ${i.severity}">${i.severity === "hard" ? "Must fix" : "Could improve"}</span>${esc(i.message)}</li>`).join("");
@@ -297,18 +291,15 @@ function render(d) {
   const hooks = (m.hook_candidates || []).map(h => {
     const win = h.text === d.hook;
     return `<tr class="${win ? "win" : ""}"><td>${win ? '<span class="win-mark">✓</span>' : ""}</td>
-      <td>${esc(h.style.replace(/_/g, " "))}</td><td>${h.score}</td>
-      <td>${esc(h.text)}<div class="reasons">${esc(h.reasons.join("  "))}</div></td></tr>`;
+      <td>${esc(STYLE_NAMES[h.style] || h.style)}</td><td>${Math.round(h.score)}</td><td>${esc(h.text)}</td></tr>`;
   }).join("");
 
   $("result").innerHTML = `
     <div class="result-head">
       <div class="badges">
         <span class="badge ${timingClass}">~${Math.round(est)}s of ${target}s</span>
-        <span class="badge ${scoreClass}">Check score ${m.score}/100</span>
-        <span class="badge">${esc(engine)}</span>
-        ${m.revisions !== undefined ? `<span class="badge">${m.revisions} revision${m.revisions === 1 ? "" : "s"}</span>` : ""}
-        ${m.hook_style ? `<span class="badge">Hook: ${esc(m.hook_style.replace(/_/g, " "))}</span>` : ""}
+        <span class="badge ${scoreClass}">Quality ${m.score}/100</span>
+        <span class="badge" title="${esc(m.engine)}">${esc(engine)}</span>
       </div>
       <button class="ghost" type="button" id="copy">Copy script</button>
     </div>
@@ -344,7 +335,7 @@ function render(d) {
       ${issues ? `<div class="box"><h3>What the checker flagged</h3><ul>${issues}</ul></div>`
                : `<div class="box"><h3>What the checker flagged</h3>Nothing. It passed every check.</div>`}
       ${hooks ? `<details class="box"><summary>The 3 hooks it considered</summary>
-        <table><thead><tr><th></th><th>Style</th><th>Score</th><th>Hook</th></tr></thead><tbody>${hooks}</tbody></table></details>` : ""}
+        <table><thead><tr><th></th><th>Approach</th><th>Score</th><th>Opening line</th></tr></thead><tbody>${hooks}</tbody></table></details>` : ""}
     </div>`;
 
   $("copy").onclick = async () => {
