@@ -47,8 +47,12 @@ class Handler(BaseHTTPRequestHandler):
             self._json(400, {"error": str(err)})
             return
         except LLMError as err:
-            message = ("Every AI model is busy right now (Google reports high demand)."
-                       if err.transient else str(err).split("\n")[0])
+            if err.status == 429:
+                message = "You've used up the free AI quota for now. It resets after a short wait."
+            elif err.transient:
+                message = "Google's AI models are all overloaded right now. I tried each one three times."
+            else:
+                message = str(err).split("\n")[0]
             self._json(503, {"error": message, "transient": err.transient})
             return
         payload = {**result.script, "meta": result.meta}

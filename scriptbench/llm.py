@@ -30,11 +30,13 @@ log = logging.getLogger(__name__)
 
 
 class LLMError(RuntimeError):
-    def __init__(self, message: str, transient: bool = False):
+    def __init__(self, message: str, transient: bool = False, status: int | None = None):
         super().__init__(message)
         # True when another model (or a later attempt) might succeed:
         # overloaded, rate-limited, timed out. False for bad keys and bad requests.
         self.transient = transient
+        # HTTP status when there was one: 429 = quota used up, 503 = provider overloaded.
+        self.status = status
 
 
 class JSONModel(Protocol):
@@ -113,13 +115,17 @@ class FallbackClient:
     """Tries each client in order, moving on only when one is overloaded or unreachable.
 
     After a success it starts from that client next time, so a revision round
-    doesn't wait on a model that just failed.
+    doesn't wait on a model that just failed. Overload comes in short spikes that
+    move between models, so if every model is busy it pauses and goes round again
+    (`rounds` passes in total) before giving up.
     """
 
-    def __init__(self, clients: list[JSONModel]):
+    def __init__(self, clients: list[JSONModel], rounds: int = 3, pause: float = 5.0):
         if not clients:
             raise ValueError("FallbackClient needs at least one client")
         self.clients = clients
+        self.rounds = max(1, rounds)
+        self.pause = pause
         self.used: list[str] = []
         self._start = 0
 
@@ -130,19 +136,24 @@ class FallbackClient:
 
     def generate_json(self, system: str, prompt: str, schema: dict[str, Any], temperature: float) -> dict[str, Any]:
         last_error: LLMError | None = None
-        for index in range(self._start, len(self.clients)):
-            client = self.clients[index]
-            try:
-                result = client.generate_json(system, prompt, schema, temperature)
-            except LLMError as err:
-                if not err.transient:
-                    raise
-                log.warning("%s unavailable, falling back to the next model", client.model)
-                last_error = err
-                continue
-            self._start = index
-            self.used.append(client.model)
-            return result
+        for round_no in range(self.rounds):
+            if round_no:
+                log.warning("every model is busy, trying again in %.0fs", self.pause)
+                time.sleep(self.pause)
+            first = self._start if round_no == 0 else 0
+            for index in range(first, len(self.clients)):
+                client = self.clients[index]
+                try:
+                    result = client.generate_json(system, prompt, schema, temperature)
+                except LLMError as err:
+                    if not err.transient:
+                        raise
+                    log.warning("%s unavailable, falling back to the next model", client.model)
+                    last_error = err
+                    continue
+                self._start = index
+                self.used.append(client.model)
+                return result
         assert last_error is not None
         raise last_error
 
@@ -165,7 +176,7 @@ def _post_json(url: str, headers: dict[str, str], payload: dict[str, Any],
                 time.sleep(_retry_delay(detail, attempt, err.headers.get("retry-after")))
                 continue
             raise LLMError(f"{provider} API returned HTTP {err.code}: {detail[:500]}",
-                           transient=err.code in _RETRYABLE) from err
+                           transient=err.code in _RETRYABLE, status=err.code) from err
         except (urllib.error.URLError, TimeoutError) as err:
             if attempt < retries - 1:
                 time.sleep(2 ** (attempt + 1))
@@ -231,7 +242,9 @@ def client_from_env() -> JSONModel | None:
         models = [m.strip() for m in chain.split(",") if m.strip()]
         if len(models) == 1:
             return GeminiClient(gemini_key, model=models[0])
-        return FallbackClient([GeminiClient(gemini_key, model=m, retries=2) for m in models])
+        # One attempt per model per round: a busy model hands over at once, and
+        # FallbackClient's rounds do the waiting.
+        return FallbackClient([GeminiClient(gemini_key, model=m, retries=1) for m in models])
     if provider == "groq" and groq_key:
         return GroqClient(groq_key, model=os.environ.get("GROQ_MODEL", GROQ_DEFAULT_MODEL))
     return None

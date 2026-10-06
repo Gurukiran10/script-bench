@@ -270,7 +270,7 @@ $("form").addEventListener("submit", async e => {
 
 function showError(d) {
   const tip = d.transient
-    ? `<p>The AI service is overloaded right now. Wait a minute and try again, or use the quick template instead.</p>
+    ? `<p>This is on Google's side, and it usually clears within a minute or two. Try again shortly, or use the quick template for now.</p>
        <button class="ghost" type="button" onclick="$('m-off').click(); $('go').click()">Use quick template</button>`
     : "";
   $("result").innerHTML = `<div class="error"><h2>Couldn't generate a script</h2><p>${esc(d.error)}</p>${tip}</div>`;

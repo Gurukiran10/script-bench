@@ -148,6 +148,25 @@ class FallbackTests(unittest.TestCase):
         self.assertEqual(busy.calls, 1)  # second call starts from the model that worked
         self.assertEqual(client.model, "good")
 
+    def test_goes_round_again_when_every_model_is_busy(self):
+        class FlakyModel(self.Model):
+            def generate_json(self, *args):
+                self.calls += 1
+                if self.calls == 1:
+                    raise LLMError("503", transient=True, status=503)
+                return {"ok": self.model}
+
+        busy, flaky = self.Model("busy", LLMError("503", transient=True)), FlakyModel("flaky")
+        client = FallbackClient([busy, flaky], rounds=2, pause=0)
+        self.assertEqual(client.generate_json("", "", {}, 0), {"ok": "flaky"})
+        self.assertEqual((busy.calls, flaky.calls), (2, 2))
+
+    def test_gives_up_after_the_last_round(self):
+        busy = self.Model("busy", LLMError("503", transient=True))
+        with self.assertRaises(LLMError):
+            FallbackClient([busy], rounds=3, pause=0).generate_json("", "", {}, 0)
+        self.assertEqual(busy.calls, 3)
+
     def test_does_not_hide_permanent_errors(self):
         client = FallbackClient([self.Model("bad-key", LLMError("401")), self.Model("good")])
         with self.assertRaises(LLMError):
