@@ -278,10 +278,11 @@ function showError(d) {
 
 function render(d) {
   const m = d.meta, s = m.section_seconds, target = m.target_seconds, est = m.estimated_seconds;
-  const off = Math.abs(est - target) / target;
+  // Same rule as the checker (budget.tolerance); the epsilon absorbs float rounding at the boundary.
+  const off = Math.abs(est - target) / target - m.budget.tolerance - 1e-9;
   const scale = Math.max(target, est) * 1.08;
   const pct = x => (x / scale * 100).toFixed(2) + "%";
-  const timingClass = off <= 0.12 ? "good" : "bad";
+  const timingClass = off <= 0 ? "good" : "bad";
   const scoreClass = m.score >= 90 ? "good" : m.score >= 70 ? "warn" : "bad";
   const engine = m.engine === "templates" ? "Quick template" : "AI writer";
 
